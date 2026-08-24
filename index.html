@@ -26,7 +26,7 @@
             font-family: 'Orbitron', sans-serif;
         }
 
-        /* Banner title replica matching uploaded graphic */
+        /* Banner title replica */
         .title-mengenal {
             color: #facc15;
             text-shadow: 
@@ -45,13 +45,13 @@
             letter-spacing: 3px;
         }
 
-        /* Planet title green styling matching uploaded green planet names */
+        /* Planet title green styling */
         .planet-title-green {
             color: #10b981;
             text-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
         }
 
-        /* Red back button styling matching original image */
+        /* Red back button styling */
         .btn-kembali {
             background: linear-gradient(180deg, #ff4b4b 0%, #dc2626 100%);
             box-shadow: 0 4px 15px rgba(220, 38, 38, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.3);
@@ -461,6 +461,18 @@
             const audio = document.getElementById('instructionAudio');
             const btn = document.getElementById('speakInstructionBtn');
 
+            // Hentikan audio planet jika sedang menyala
+            if (currentPlanetAudio) {
+                currentPlanetAudio.pause();
+                currentPlanetAudio.currentTime = 0;
+                
+                const ttsBtn = document.getElementById('ttsBtn');
+                if (ttsBtn) {
+                    ttsBtn.innerHTML = `<i class="fa-solid fa-volume-high text-lg"></i><span class="hidden sm:inline">Bacakan</span>`;
+                    ttsBtn.classList.remove('animate-bounce');
+                }
+            }
+
             if (audio) {
                 audio.currentTime = 0;
                 audio.play().catch(error => {
@@ -500,7 +512,6 @@
                 };
             }
 
-            // Jika dipanggil via klik tombol (bukan sekadar instruksi autoplay awal saat audio sedang jalan)
             if (!currentPlanetAudio.paused && !autoPlayOnly) {
                 // JEDA (PAUSE)
                 currentPlanetAudio.pause();
@@ -893,7 +904,16 @@
             const data = planetData[key];
             if (!data) return;
 
-            // Hentikan audio yang sedang berjalan dari planet lain
+            // 🛑 1. HENTIKAN AUDIO PETUNJUK SEKETIKA
+            const instructionAudio = document.getElementById('instructionAudio');
+            const instructionBtn = document.getElementById('speakInstructionBtn');
+            if (instructionAudio && !instructionAudio.paused) {
+                instructionAudio.pause();
+                instructionAudio.currentTime = 0;
+                if (instructionBtn) instructionBtn.classList.remove('animate-bounce');
+            }
+
+            // 🛑 2. HENTIKAN AUDIO PLANET SEBELUMNYA JIKA SEDANG BERJALAN
             if (currentPlanetAudio) {
                 currentPlanetAudio.pause();
                 currentPlanetAudio.currentTime = 0;
@@ -918,7 +938,7 @@
             card.classList.remove('scale-95');
             card.classList.add('scale-100');
 
-            // AUTO PLAY AUDIO PENJELASAN PLANET
+            // 🔊 3. PUTAR AUDIO PLANET YANG BARU DIKLIK
             speakCurrentPlanet(true);
         }
 
@@ -938,7 +958,7 @@
             playBeep(392.00, 0.1);
 
             const modal = document.getElementById('planetModal');
-            const card = document.getElementById('modalCard');
+            card = document.getElementById('modalCard');
 
             modal.classList.add('opacity-0', 'pointer-events-none');
             card.classList.remove('scale-100');
